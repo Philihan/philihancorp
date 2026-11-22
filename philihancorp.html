@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>PhilihanCorp — Analis Crypto</title>
+    <meta name="description" content="PhilihanCorp: analisis crypto berbahasa Indonesia — teknikal, on-chain, dan manajemen risiko. Data dulu, opini kemudian." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+      * { box-sizing: border-box; }
+      :root {
+        color-scheme: light dark;
+        --bg: #f2f4f6;
+        --panel: #ffffff;
+        --panel-2: #e9edf1;
+        --line: #d5dbe2;
+        --text: #131a21;
+        --muted: #55636f;
+        --gold: #a87408;
+        --gold-soft: rgba(168, 116, 8, .12);
+        --up: #0c7a54;
+        --down: #c22e44;
+        --chart-line: #a87408;
+        --grid: #dde3e9;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a0d10;
+          --panel: #11151b;
+          --panel-2: #171d26;
+          --line: #232c38;
+          --text: #e9edf2;
+          --muted: #93a2b4;
+          --gold: #f0b73c;
+          --gold-soft: rgba(240, 183, 60, .12);
+          --up: #2ebd85;
+          --down: #f6465d;
+          --chart-line: #f0b73c;
+          --grid: #1e2632;
+        }
+      }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Archivo", system-ui, sans-serif;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+      a { color: var(--gold); }
+      .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+      /* ---------- top bar ---------- */
+      header.topbar {
+        position: sticky; top: 0; z-index: 20;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+      .topbar-in { display: flex; align-items: center; gap: 20px; min-height: 60px; flex-wrap: wrap; padding-top: 6px; padding-bottom: 6px; }
+      .brand { font-weight: 800; font-size: 1.25rem; letter-spacing: -.02em; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+      .brand .mark {
+        width: 30px; height: 30px; border-radius: 7px; background: var(--gold); color: #131313;
+        display: grid; place-items: center; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: .95rem;
+      }
+      .brand em { font-style: normal; color: var(--gold); }
+      nav.main { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+      nav.main a {
+        color: var(--text); text-decoration: none; font-size: .92rem; font-weight: 500;
+        padding: 8px 12px; border-radius: 8px; min-height: 36px; display: inline-flex; align-items: center;
+      }
+      nav.main a:hover { background: var(--panel-2); }
+      .x-link {
+        border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; min-height: 36px;
+        display: inline-flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none; font-weight: 600; font-size: .92rem;
+      }
+      .x-link:hover { border-color: var(--gold); }
+
+      /* ---------- ticker ---------- */
+      .ticker { border-bottom: 1px solid var(--line); background: var(--panel); }
+      .ticker-in { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+      .ticker-in::-webkit-scrollbar { display: none; }
+      .tick { padding: 10px 18px 10px 0; margin-right: 18px; border-right: 1px solid var(--line); white-space: nowrap; }
+      .tick:last-child { border-right: 0; }
+      .tick .sym { font-weight: 700; font-size: .85rem; letter-spacing: .04em; }
+      .tick .pr { font-family: "JetBrains Mono", monospace; font-size: .95rem; margin-left: 8px; }
+      .chg { font-family: "JetBrains Mono", monospace; font-size: .85rem; margin-left: 8px; font-weight: 700; }
+      .up { color: var(--up); } .down { color: var(--down); }
+      .ticker-note { font-size: .78rem; color: var(--muted); padding: 8px 0 10px; }
+
+      /* ---------- hero ---------- */
+      .hero { padding: 56px 0 8px; display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px; align-items: start; }
+      .hero h1 { font-size: clamp(2rem, 4.6vw, 3.1rem); line-height: 1.08; letter-spacing: -.025em; margin: 0 0 16px; font-weight: 800; }
+      .hero h1 .hl { color: var(--gold); }
+      .hero p.lede { font-size: 1.08rem; color: var(--muted); margin: 0 0 26px; max-width: 34rem; }
+      .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+      .btn {
+        display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 10px 20px;
+        border-radius: 10px; font-weight: 700; font-size: .98rem; text-decoration: none; border: 1px solid transparent;
+      }
+      .btn-gold { background: var(--gold); color: #141414; }
+      .btn-ghost { border-color: var(--line); color: var(--text); background: var(--panel); }
+      .hero-points { margin: 30px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+      .hero-points li { display: flex; gap: 10px; font-size: .97rem; }
+      .hero-points .dot { color: var(--gold); font-weight: 800; }
+
+      /* ---------- chart card ---------- */
+      .chart-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+      .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+      .chart-head .pair { font-weight: 800; font-size: 1.05rem; }
+      .chart-head .pair span { color: var(--muted); font-weight: 500; font-size: .85rem; margin-left: 6px; }
+      .chart-price { font-family: "JetBrains Mono", monospace; font-size: 1.5rem; font-weight: 700; }
+      .chart-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+      .stat { background: var(--panel-2); border-radius: 10px; padding: 10px 12px; }
+      .stat .k { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+      .stat .v { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: .98rem; margin-top: 2px; }
+      .chart-wrap { position: relative; margin-top: 10px; }
+      svg.chart { width: 100%; height: auto; display: block; }
+      .chart-tip {
+        position: absolute; pointer-events: none; background: var(--text); color: var(--bg);
+        font-family: "JetBrains Mono", monospace; font-size: .78rem; padding: 5px 9px; border-radius: 6px;
+        transform: translate(-50%, -130%); white-space: nowrap; opacity: 0; transition: opacity .12s;
+      }
+      .chart-note { font-size: .8rem; color: var(--muted); margin-top: 10px; }
+
+      /* ---------- sections ---------- */
+      section.block, #pasar { scroll-margin-top: 84px; }
+      section.block { padding: 52px 0 8px; }
+      .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+      .sec-head h2 { font-size: 1.65rem; letter-spacing: -.02em; margin: 0; font-weight: 800; }
+      .sec-head .tag { font-family: "JetBrains Mono", monospace; font-size: .8rem; color: var(--gold); background: var(--gold-soft); padding: 3px 9px; border-radius: 99px; }
+      .sec-sub { color: var(--muted); max-width: 44rem; margin: 0 0 26px; }
+
+      .analysis-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 20px; }
+      .stack { display: grid; gap: 20px; }
+      article.post { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+      article.post h3 { margin: 10px 0 8px; font-size: 1.3rem; letter-spacing: -.015em; line-height: 1.25; }
+      .stack article.post h3 { font-size: 1.12rem; }
+      article.post p { color: var(--muted); margin: 0 0 14px; font-size: .97rem; }
+      article.post p strong { color: var(--text); }
+      .meta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+      .bias { font-family: "JetBrains Mono", monospace; font-size: .75rem; font-weight: 700; letter-spacing: .05em; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; }
+      .bias-bear { background: color-mix(in srgb, var(--down) 14%, transparent); color: var(--down); }
+      .bias-cautious { background: var(--gold-soft); color: var(--gold); }
+      .meta-row .date { font-size: .82rem; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+      table.levels { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 4px; }
+      table.levels th, table.levels td { text-align: left; padding: 7px 8px; border-top: 1px solid var(--line); }
+      table.levels th { color: var(--muted); font-weight: 500; font-size: .8rem; }
+      table.levels td.num { font-family: "JetBrains Mono", monospace; text-align: right; font-weight: 600; }
+      table.levels th.num { text-align: right; }
+
+      /* ---------- services ---------- */
+      .svc { display: grid; grid-template-columns: 1fr 1fr; gap: 0 48px; }
+      .svc-item { display: grid; grid-template-columns: 52px 1fr; gap: 16px; padding: 22px 0; border-top: 1px solid var(--line); }
+      .svc-item .no { font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--gold); font-size: 1.05rem; padding-top: 2px; }
+      .svc-item h3 { margin: 0 0 6px; font-size: 1.08rem; }
+      .svc-item p { margin: 0; color: var(--muted); font-size: .95rem; }
+
+      /* ---------- method ---------- */
+      .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .step { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+      .step .n { font-family: "JetBrains Mono", monospace; color: var(--gold); font-weight: 700; font-size: .85rem; }
+      .step h3 { margin: 8px 0 6px; font-size: 1rem; }
+      .step p { margin: 0; color: var(--muted); font-size: .9rem; }
+
+      .risk-band { margin-top: 26px; background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 10px; padding: 20px 22px; }
+      .risk-band h3 { margin: 0 0 8px; font-size: 1.05rem; }
+      .risk-band p { margin: 0; color: var(--muted); font-size: .95rem; }
+      .risk-band p + p { margin-top: 8px; }
+
+      /* ---------- faq ---------- */
+      details.faq { border-top: 1px solid var(--line); padding: 6px 0; }
+      details.faq:last-of-type { border-bottom: 1px solid var(--line); }
+      details.faq summary { cursor: pointer; font-weight: 600; padding: 12px 4px; min-height: 44px; display: flex; align-items: center; list-style: none; }
+      details.faq summary::-webkit-details-marker { display: none; }
+      details.faq summary::after { content: "+"; margin-left: auto; font-family: "JetBrains Mono", monospace; color: var(--gold); font-size: 1.2rem; }
+      details.faq[open ] summary::after { content: "–"; }
+      details.faq .a { padding: 0 4px 16px; color: var(--muted); max-width: 46rem; }
+
+      /* ---------- about / footer ---------- */
+      .about { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 26px; }
+      .avatar {
+        width: 76px; height: 76px; border-radius: 50%; background: var(--gold); color: #141414;
+        display: grid; place-items: center; font-weight: 800; font-size: 1.5rem; letter-spacing: -.02em; flex: none;
+      }
+      .about h3 { margin: 0 0 4px; font-size: 1.2rem; }
+      .about p { margin: 0; color: var(--muted); font-size: .97rem; }
+      footer { margin-top: 60px; border-top: 1px solid var(--line); padding: 28px 0 40px; }
+      footer .frow { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: baseline; }
+      footer p { color: var(--muted); font-size: .85rem; max-width: 52rem; }
+      footer a { min-height: 32px; display: inline-flex; align-items: center; }
+
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; padding-top: 36px; }
+        .analysis-grid { grid-template-columns: 1fr; }
+        .steps { grid-template-columns: 1fr 1fr; }
+        .svc { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 560px) {
+        .steps { grid-template-columns: 1fr; }
+        .chart-stats { grid-template-columns: 1fr 1fr; }
+        .about { grid-template-columns: 1fr; }
+        .topbar-in { row-gap: 2px; }
+        .x-link { margin-left: auto; }
+        nav.main { order: 3; width: 100%; margin-left: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+        nav.main::-webkit-scrollbar { display: none; }
+        nav.main a { white-space: nowrap; }
+        section.block, #pasar { scroll-margin-top: 132px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="brand" href="#atas"><span class="mark">P</span>Philihan<em>Corp</em></a>
+        <nav class="main" aria-label="Navigasi utama">
+          <a href="#pasar">Pasar</a>
+          <a href="#analisis">Analisis</a>
+          <a href="#layanan">Layanan</a>
+          <a href="#metode">Metode</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <a class="x-link" href="https://x.com/M_philihan" target="_blank" rel="noopener">𝕏&nbsp;@M_philihan</a>
+      </div>
+    </header>
+
+    <div class="ticker" id="pasar">
+      <div class="wrap">
+        <div class="ticker-in" role="list" aria-label="Harga pasar snapshot">
+          <div class="tick" role="listitem"><span class="sym">BTC/USDT</span><span class="pr">$59.084</span><span class="chg up">+4,69%</span></div>
+          <div class="tick" role="listitem"><span class="sym">ETH/USDT</span><span class="pr">$1.658,59</span><span class="chg up">+5,86%</span></div>
+          <div class="tick" role="listitem"><span class="sym">SOL/USDT</span><span class="pr">$69,08</span><span class="chg up">+4,10%</span></div>
+        </div>
+        <p class="ticker-note">Snapshot harga per Minggu, 22 November 2026 pukul 13.34 WIB — sumber: Finnhub (Binance). Halaman ini statis; harga tidak diperbarui otomatis.</p>
+      </div>
+    </div>
+
+    <main class="wrap" id="atas">
+      <!-- HERO -->
+      <div class="hero">
+        <div>
+          <h1>Analisis crypto yang jernih, <span class="hl">tanpa janji manis.</span></h1>
+          <p class="lede">PhilihanCorp membaca pasar crypto dengan data: struktur harga, level teknikal, dan arus on-chain — ditulis dalam Bahasa Indonesia yang lugas, lengkap dengan skenario yang membatalkan analisanya.</p>
+          <div class="cta-row">
+            <a class="btn btn-gold" href="#analisis">Baca analisis terbaru</a>
+            <a class="btn btn-ghost" href="https://x.com/M_philihan" target="_blank" rel="noopener">Ikuti di X</a>
+          </div>
+          <ul class="hero-points">
+            <li><span class="dot">▸</span><span><strong>Level dulu, opini kemudian</strong> — setiap analisis menyebut support, resistance, dan titik invalidasi.</span></li>
+            <li><span class="dot">▸</span><span><strong>Risiko dihitung, bukan ditebak</strong> — ukuran posisi dan batas rugi dibahas di setiap rencana.</span></li>
+            <li><span class="dot">▸</span><span><strong>Bukan sinyal berbayar</strong> — tidak ada grup VIP, tidak ada janji profit.</span></li>
+          </ul>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-head">
+            <div class="pair">BTC/USDT <span>Penutupan harian · 30 hari</span></div>
+            <div><span class="chart-price">$59.084</span> <span class="chg up">+4,69%</span></div>
+          </div>
+          <div class="chart-wrap">
+            <svg class="chart" viewBox="0 0 720 260" role="img" aria-label="Grafik penutupan harian Bitcoin 30 hari terakhir: turun dari sekitar 81.189 dolar pada 23 Oktober ke 57.884 dolar pada 21 November 2026">
+              <line x1="10" y1="222.8" x2="710" y2="222.8" stroke="var(--grid)" stroke-width="1" />
+              <line x1="10" y1="150.8" x2="710" y2="150.8" stroke="var(--grid)" stroke-width="1" />
+              <line x1="10" y1="78.8" x2="710" y2="78.8" stroke="var(--grid)" stroke-width="1" />
+              <text x="10" y="238" fill="var(--muted)" font-size="11" font-family="JetBrains Mono, monospace">$55rb</text>
+              <text x="10" y="140" fill="var(--muted)" font-size="11" font-family="JetBrains Mono, monospace">$65rb</text>
+              <text x="10" y="68" fill="var(--muted)" font-size="11" font-family="JetBrains Mono, monospace">$75rb</text>
+              <polyline id="btcLine" fill="none" stroke="var(--chart-line)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+                points="10.0,34.2 34.1,36.4 58.3,41.7 82.4,41.7 106.6,36.2 130.7,33.1 154.8,57.3 179.0,61.7 203.1,60.2 227.2,54.7 251.4,65.7 275.5,61.1 299.7,39.2 323.8,71.0 347.9,72.7 372.1,72.6 396.2,79.9 420.3,76.2 444.5,87.5 468.6,85.9 492.8,104.3 516.9,126.9 541.0,156.9 565.2,148.3 589.3,151.6 613.4,151.2 637.6,164.7 661.7,172.5 685.9,194.3 710.0,202.0" />
+              <circle id="btcDot" r="5" fill="var(--chart-line)" stroke="var(--panel)" stroke-width="2" cx="710" cy="202" />
+              <rect id="btcHit" x="0" y="0" width="720" height="260" fill="transparent" />
+              <text x="10" y="256" fill="var(--muted)" font-size="11" font-family="JetBrains Mono, monospace">23 Okt</text>
+              <text x="228" y="256" fill="var(--muted)" font-size="11" font-family="JetBrains Mono, monospace">2 Nov</text>
+              <text x="470" y="256" fill="var(--muted)" font-size="11" font-family="JetBrains Mono, monospace">12 Nov</text>
+              <text x="664" y="256" fill="var(--muted)" font-size="11" font-family="JetBrains Mono, monospace">21 Nov</text>
+            </svg>
+            <div class="chart-tip" id="btcTip"></div>
+          </div>
+          <div class="chart-stats">
+            <div class="stat"><div class="k">Tertinggi 24 jam</div><div class="v">$60.996</div></div>
+            <div class="stat"><div class="k">Terendah 24 jam</div><div class="v">$56.294</div></div>
+            <div class="stat"><div class="k">30 hari (penutupan)</div><div class="v down">−28,7%</div></div>
+          </div>
+          <p class="chart-note">Geser kursor atau sentuh grafik untuk melihat penutupan tiap hari. Data: candle harian BTC/USDT (Binance via Finnhub), 23 Okt – 21 Nov 2026; harga terakhir per 22 Nov 2026, 13.34 WIB.</p>
+        </div>
+      </div>
+
+      <!-- ANALISIS -->
+      <section class="block" id="analisis">
+        <div class="sec-head"><h2>Analisis terbaru</h2><span class="tag">22 NOV 2026</span></div>
+        <p class="sec-sub">Tiga aset yang paling banyak dipantau minggu ini. Semua level diambil dari candle harian Binance; angka harga per snapshot 22 November 2026, 13.34 WIB.</p>
+
+        <div class="analysis-grid">
+          <article class="post">
+            <div class="meta-row"><span class="bias bias-cautious">Bias: Hati-hati · Rebound</span><span class="date">BTC/USDT · 22 Nov 2026</span></div>
+            <h3>Bitcoin memantul dari $55 ribu — tapi tren 30 hari masih turun</h3>
+            <p>BTC sempat menyentuh <strong>$55.130</strong> pada 21 November sebelum memantul ke area <strong>$59.084</strong> (+4,69% dalam 24 jam). Pantulan ini sehat sebagai reaksi dari area jenuh jual, tetapi struktur besarnya belum berubah: penutupan harian turun <strong>−28,7% dalam 30 hari</strong>, dan harga masih di bawah bekas support $62–64 ribu yang kini berpotensi menjadi resistance.</p>
+            <p>Skenario kami sederhana: selama penutupan harian bertahan di atas $55.130, pantulan bisa berlanjut menguji $60.996 lalu $62.639. Sebaliknya, <strong>penutupan harian di bawah $55.130 membatalkan skenario rebound</strong> dan membuka ruang turun lebih dalam. Ini fase untuk ukuran posisi kecil dan kesabaran, bukan mengejar harga.</p>
+            <table class="levels">
+              <tr><th>Level kunci</th><th class="num">Harga (USDT)</th></tr>
+              <tr><td>Resistance 2 — tertinggi 19 Nov</td><td class="num">64.080</td></tr>
+              <tr><td>Resistance 1 — tertinggi 24 jam</td><td class="num">60.996</td></tr>
+              <tr><td>Support 1 — terendah 24 jam</td><td class="num">56.294</td></tr>
+              <tr><td>Support 2 — terendah 21 Nov (invalidasi)</td><td class="num">55.130</td></tr>
+            </table>
+          </article>
+
+          <div class="stack">
+            <article class="post">
+              <div class="meta-row"><span class="bias bias-cautious">Bias: Hati-hati · Rebound</span><span class="date">ETH/USDT · 22 Nov 2026</span></div>
+              <h3>Ethereum: pantulan +5,86%, ujian pertama di $1.716</h3>
+              <p>ETH naik ke <strong>$1.658,59</strong> setelah terendah 21 November di $1.538. Resistance terdekat adalah tertinggi 24 jam di <strong>$1.716</strong>, lalu penutupan 19 November di $1.757. Selama harga di bawah keduanya, pantulan ini kami perlakukan sebagai koreksi dalam tren turun — bukan pembalikan.</p>
+              <table class="levels">
+                <tr><th>Level kunci</th><th class="num">Harga (USDT)</th></tr>
+                <tr><td>Resistance — tertinggi 24 jam</td><td class="num">1.716</td></tr>
+                <tr><td>Support — terendah 24 jam</td><td class="num">1.566</td></tr>
+                <tr><td>Support — terendah 21 Nov</td><td class="num">1.538</td></tr>
+              </table>
+            </article>
+
+            <article class="post">
+              <div class="meta-row"><span class="bias bias-bear">Bias: Bearish · Di bawah struktur</span><span class="date">SOL/USDT · 22 Nov 2026</span></div>
+              <h3>Solana tertahan di bawah $73 — pantulan belum mengubah apa pun</h3>
+              <p>SOL diperdagangkan di <strong>$69,08</strong> (+4,10%), masih jauh di bawah penutupan 19 November di $73,15 dan turun −36,9% dalam sebulan. Area <strong>$71–73</strong> adalah tembok pertama yang harus ditembus dengan penutupan harian sebelum bicara pemulihan. Di bawahnya, support $66,15 dan $64,87 menjaga skenario turun.</p>
+              <table class="levels">
+                <tr><th>Level kunci</th><th class="num">Harga (USDT)</th></tr>
+                <tr><td>Resistance — tertinggi 20 Nov</td><td class="num">73,56</td></tr>
+                <tr><td>Resistance — tertinggi 24 jam</td><td class="num">71,12</td></tr>
+                <tr><td>Support — terendah 24 jam</td><td class="num">66,15</td></tr>
+              </table>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- LAYANAN -->
+      <section class="block" id="layanan">
+        <div class="sec-head"><h2>Apa yang dikerjakan PhilihanCorp</h2></div>
+        <p class="sec-sub">Empat bidang kerja utama — semuanya berangkat dari satu kebiasaan: verifikasi dulu di data dan di rantai, baru bicara.</p>
+        <div class="svc">
+          <div class="svc-item">
+            <div class="no">01</div>
+            <div>
+              <h3>Analisis teknikal &amp; struktur pasar</h3>
+              <p>Pembacaan tren, support–resistance, dan skenario harga untuk aset utama seperti BTC, ETH, dan SOL — selalu disertai level invalidasi, bukan sekadar arah.</p>
+            </div>
+          </div>
+          <div class="svc-item">
+            <div class="no">02</div>
+            <div>
+              <h3>Riset on-chain &amp; keamanan kontrak</h3>
+              <p>Pemeriksaan kontrak pintar sebelum menyentuh proyek baru: verifikasi source code di block explorer, fungsi mint/withdraw, kepemilikan kontrak, dan simulasi transaksi sebelum eksekusi.</p>
+            </div>
+          </div>
+          <div class="svc-item">
+            <div class="no">03</div>
+            <div>
+              <h3>Manajemen risiko &amp; ukuran posisi</h3>
+              <p>Kerangka batas rugi per posisi, aturan persetujuan transaksi yang presisi, dan disiplin "simulasi dulu, tanda tangan kemudian" untuk setiap aktivitas on-chain.</p>
+            </div>
+          </div>
+          <div class="svc-item">
+            <div class="no">04</div>
+            <div>
+              <h3>Edukasi pasar untuk pemula</h3>
+              <p>Penjelasan konsep pasar crypto dalam Bahasa Indonesia yang sederhana: cara membaca candle, mengenali penipuan berkedok proyek resmi, dan menghindari keputusan panik.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- METODE -->
+      <section class="block" id="metode">
+        <div class="sec-head"><h2>Cara kami bekerja</h2></div>
+        <p class="sec-sub">Setiap analisis yang terbit melewati empat langkah yang sama, supaya pembaca bisa memeriksa ulang kesimpulannya.</p>
+        <div class="steps">
+          <div class="step"><div class="n">LANGKAH 1</div><h3>Ambil data</h3><p>Harga, candle, dan data pasar diambil dari bursa utama dan dicatat waktu pengambilannya.</p></div>
+          <div class="step"><div class="n">LANGKAH 2</div><h3>Petakan level</h3><p>Support, resistance, dan titik invalidasi ditentukan dari struktur harga yang benar-benar terjadi.</p></div>
+          <div class="step"><div class="n">LANGKAH 3</div><h3>Susun skenario</h3><p>Minimal dua skenario ditulis: apa yang terjadi jika harga naik, dan apa yang membatalkan analisisnya jika turun.</p></div>
+          <div class="step"><div class="n">LANGKAH 4</div><h3>Hitung risiko</h3><p>Ukuran posisi dan batas rugi ditetapkan sebelum peluangnya dibahas — bukan sesudahnya.</p></div>
+        </div>
+        <div class="risk-band">
+          <h3>Prinsip risiko yang tidak bisa ditawar</h3>
+          <p>Jangan pernah membagikan private key atau seed phrase kepada siapa pun — termasuk yang mengaku dari PhilihanCorp. Verifikasi kontrak sebelum berinteraksi, simulasikan transaksi sebelum menandatangani, dan gunakan hanya dana yang sanggup hilang.</p>
+          <p>Semua konten di halaman ini adalah materi edukasi dan opini analisis, <strong>bukan saran finansial</strong>. Pasar crypto sangat volatil; keputusan beli dan jual sepenuhnya tanggung jawab masing-masing.</p>
+        </div>
+      </section>
+
+      <!-- TENTANG -->
+      <section class="block" id="tentang">
+        <div class="about">
+          <div class="avatar" aria-hidden="true">MP</div>
+          <div>
+            <h3>Muhammad Eko Philihan — analis di balik PhilihanCorp</h3>
+            <p>Berbasis di Kotabumi, Lampung Utara. Aktif di ekosistem on-chain — dari riset kontrak dan mint di BNB Chain sampai audit keamanan kontrak pintar — dan menulis analisis pasar crypto dalam Bahasa Indonesia lewat PhilihanCorp dan akun X <a href="https://x.com/M_philihan" target="_blank" rel="noopener">@M_philihan</a>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="block" id="faq">
+        <div class="sec-head"><h2>Pertanyaan umum</h2></div>
+        <details class="faq">
+          <summary>Apakah PhilihanCorp menjual sinyal trading?</summary>
+          <div class="a">Tidak. PhilihanCorp menerbitkan analisis dan edukasi pasar. Tidak ada grup VIP, tidak ada sinyal berbayar, dan tidak ada janji keuntungan — siapa pun yang mengatasnamakan PhilihanCorp untuk menjual sinyal patut dicurigai sebagai penipuan.</div>
+        </details>
+        <details class="faq">
+          <summary>Seberapa sering analisis diterbitkan?</summary>
+          <div class="a">Analisis aset utama diperbarui mengikuti pergerakan penting pasar — saat level kunci ditembus atau skenario sebelumnya terbatalkan — bukan mengejar jadwal posting. Pembaruan singkat juga dibagikan lewat X di @M_philihan.</div>
+        </details>
+        <details class="faq">
+          <summary>Dari mana data harga di halaman ini?</summary>
+          <div class="a">Dari Finnhub untuk pasangan USDT di Binance, diambil sebagai snapshot pada Minggu, 22 November 2026 pukul 13.34 WIB. Halaman ini statis sehingga harga tidak berubah sendiri; untuk harga terkini, periksa langsung di bursa.</div>
+        </details>
+        <details class="faq">
+          <summary>Bagaimana cara menghubungi PhilihanCorp?</summary>
+          <div class="a">Cara tercepat adalah lewat X: <a href="https://x.com/M_philihan" target="_blank" rel="noopener">@M_philihan</a>. Sebutkan aset dan timeframe yang ingin dibahas; analisis yang menarik dan relevan untuk pembaca lain bisa diangkat menjadi tulisan berikutnya.</div>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div class="frow">
+          <a class="brand" href="#atas" style="font-size:1.05rem"><span class="mark">P</span>Philihan<em>Corp</em></a>
+          <a href="https://x.com/M_philihan" target="_blank" rel="noopener">X — @M_philihan</a>
+        </div>
+        <p>© 2026 PhilihanCorp. Konten bersifat edukasi dan bukan saran finansial. Data pasar: Finnhub (Binance), snapshot 22 November 2026 pukul 13.34 WIB. Aset crypto berisiko tinggi — lakukan riset sendiri (DYOR) sebelum mengambil keputusan apa pun.</p>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        var data = [
+          ["23 Okt", 81189], ["24 Okt", 80888], ["25 Okt", 80154], ["26 Okt", 80151],
+          ["27 Okt", 80910], ["28 Okt", 81344], ["29 Okt", 77992], ["30 Okt", 77369],
+          ["31 Okt", 77582], ["1 Nov", 78354], ["2 Nov", 76816], ["3 Nov", 77454],
+          ["4 Nov", 80504], ["5 Nov", 76088], ["6 Nov", 75844], ["7 Nov", 75868],
+          ["8 Nov", 74851], ["9 Nov", 75368], ["10 Nov", 73796], ["11 Nov", 74015],
+          ["12 Nov", 71460], ["13 Nov", 68314], ["14 Nov", 64150], ["15 Nov", 65351],
+          ["16 Nov", 64883], ["17 Nov", 64947], ["18 Nov", 63068], ["19 Nov", 61987],
+          ["20 Nov", 58952], ["21 Nov", 57884]
+        ];
+        var hit = document.getElementById("btcHit");
+        var dot = document.getElementById("btcDot");
+        var tip = document.getElementById("btcTip");
+        var wrap = document.querySelector(".chart-wrap");
+        var W = 720, H = 260, pl = 10, pr = 10, pt = 14, pb = 30, ymin = 54000, ymax = 84000;
+        function fmt(n) { return "$" + n.toLocaleString("id-ID"); }
+        function show(clientX) {
+          var r = wrap.getBoundingClientRect();
+          var x = (clientX - r.left) / r.width * W;
+          var i = Math.round((x - pl) / (W - pl - pr) * (data.length - 1));
+          i = Math.max(0, Math.min(data.length - 1, i));
+          var px = pl + (W - pl - pr) * i / (data.length - 1);
+          var py = pt + (H - pt - pb) * (1 - (data[i][1] - ymin) / (ymax - ymin));
+          dot.setAttribute("cx", px); dot.setAttribute("cy", py);
+          tip.textContent = data[i][0] + " · " + fmt(data[i][1]);
+          tip.style.left = (px / W * 100) + "%";
+          tip.style.top = (py / H * 100) + "%";
+          tip.style.opacity = "1";
+        }
+        function hide() {
+          dot.setAttribute("cx", 710); dot.setAttribute("cy", 202);
+          tip.style.opacity = "0";
+        }
+        hit.addEventListener("mousemove", function (e) { show(e.clientX); });
+        hit.addEventListener("mouseleave", hide);
+        hit.addEventListener("touchstart", function (e) { show(e.touches[0].clientX); }, { passive: true });
+        hit.addEventListener("touchmove", function (e) { show(e.touches[0].clientX); }, { passive: true });
+        hit.addEventListener("touchend", hide);
+      })();
+    </script>
+  </body>
+</html>
